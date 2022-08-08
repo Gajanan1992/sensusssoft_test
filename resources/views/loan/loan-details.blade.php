@@ -22,17 +22,16 @@
 
                         </div>
                         <div class="d-flex justify-content-between">
-                            <h5>Loan Duration : {{ $user->loan->duration }}</h5>
+                            <h5>Loan Duration (No. of Days) : {{ $user->loan->duration }}</h5>
                             <h5>Loan interest Rate: {{ $user->loan->interest_rate ?? '--' }} %</h5>
-
                         </div>
                         <hr>
                         <h3>Payment Details</h3>
                         <hr>
-                        @if ($loanPaymentDetails['status'] == 'unpaid')
-                            <h5>Amount : {{ number_format($loanPaymentDetails['amount'], 2) }}</h5>
-                            <h5>Due Date : {{ $loanPaymentDetails['due_date'] }}</h5>
-                            <h5>Due Charge: {{ number_format($loanPaymentDetails['due_amount'], 2) ?? '--' }} </h5>
+                        @if ($loanPaymentDetails->due_status == 'unpaid')
+                            <h5>Amount : {{ number_format($loanPaymentDetails->amount, 2) }}</h5>
+                            <h5>Due Date : {{ $loanPaymentDetails->due_date }}</h5>
+                            <h5>Due Charge: {{ number_format($loanPaymentDetails->due_amount, 2) ?? '--' }} </h5>
 
                             <a href="/pay/{{ $user->loan->id }}" class="btn btn-primary">Pay</a>
                         @else
@@ -47,6 +46,7 @@
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Payment Method</th>
+                                    <th>Transaction Type</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,6 +56,7 @@
                                         <td>{{ $transaction->date->format('d M Y') ?? '--' }}</td>
                                         <td>{{ $transaction->amount ?? '--' }}</td>
                                         <td>{{ $transaction->payment_method ?? '--' }}</td>
+                                        <td>{{ $transaction->transaction_type ?? '--' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

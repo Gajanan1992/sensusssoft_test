@@ -3,15 +3,23 @@
 namespace App\Library;
 
 use App\Models\Loan;
+use App\Models\LoanTransaction;
 
 class LoanCalculator implements LoanCalculatorInterface
 {
     private $loanAmount;
     public Loan $loanmodel;
+    private $hasAnyRecentTransaction;
+    private $dueAmount = 0;
+    private $loanStatus = 'active';
+    private $dueStatus = 'unpaid';
 
     public function calculateLoanAmount(Loan $loan)
     {
         $this->loanmodel = $loan;
+
+        $this->checkHasAnyRecentTransaction();
+
         $interestRate = $loan->interest_rate / 100;
         $dailyRate = $interestRate / 365;
         $dailyInterestAmount = $loan->amount * $dailyRate;
@@ -24,47 +32,64 @@ class LoanCalculator implements LoanCalculatorInterface
 
     public function getPaymentDetails()
     {
-        $checkIfPaid = $this->checkIfPaid();
-        // dd($checkIfPaid);
-        $overdue = $this->checkOverDue();
+        if ($this->hasAnyRecentTransaction) {
+            $this->checkHasAnyDue();
+            $this->getDueAmount();
+            $this->checkIfLoanExpired();
+        }
 
-        return [
+        return (object) [
             'due_date' => now(),
             'amount' => $this->loanAmount,
-            'due_amount' => $overdue,
-            'status' => $checkIfPaid ? 'paid' : 'unpaid',
+            'due_amount' => $this->dueAmount,
+            'due_status' => $this->dueStatus,
+            'loan_status' => $this->loanStatus,
         ];
     }
 
-    // public function getLoanEmi()
-    // {
-    //     return $this->loanAmount;
-    // }
-
-    public function checkOverdue()
+    public function getDueAmount()
     {
+        $lastLoanTransaction = $this->getLastLoanTransaction();
 
-        $lastLoanTransaction = $this->loanmodel->loanTransactions()->orderBy('date', 'desc')->first();
-        if ($lastLoanTransaction) {
-            if ($lastLoanTransaction->date->diffInDays(now()) > 0) {
-                return ($this->loanAmount * 1) / 100;
-            } else {
-                return 0;
-            }
+        if ($lastLoanTransaction->date->diffInDays(now()) > 1) {
+            return $this->dueAmount =  ($this->loanAmount * 1) / 100;
         }
-        return 0;
     }
 
-    public function checkIfPaid()
+    public function checkHasAnyDue()
     {
-        $lastLoanTransaction = $this->loanmodel->loanTransactions()->orderBy('date', 'desc')->first();
-        if ($lastLoanTransaction) {
-            if ($lastLoanTransaction->date->diffInDays(now()) == 0) {
-                return true;
-            } else {
-                return false;
-            }
+        $lastLoanTransaction = $this->getLastLoanTransaction();
+
+        if ($lastLoanTransaction->date->diffInDays(now()) == 0) {
+            return $this->dueStatus = 'paid';
         }
-        return false;
+    }
+
+    public function checkIfLoanExpired()
+    {
+        $lastLoanTransaction = $this->getLastLoanTransaction();
+
+        if ($this->loanmodel->end_date >= now()) {
+            return $this->loanStatus = 'active';
+        } else {
+
+            return $this->loanStatus = 'expired';
+        }
+    }
+
+    public function getLastLoanTransaction()
+    {
+        return $this->loanmodel
+            ->loanTransactions()
+            ->where('transaction_type', 'payment')
+            ->orderBy('date', 'desc')
+            ->first();
+    }
+
+    public function checkHasAnyRecentTransaction()
+    {
+        $lastLoanTransaction = $this->getLastLoanTransaction();
+        $this->hasAnyRecentTransaction = $lastLoanTransaction ? true : false;
+        return $this;
     }
 }

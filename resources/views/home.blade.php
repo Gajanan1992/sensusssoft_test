@@ -28,11 +28,11 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td><a href="/loan-details/{{ $user->id }}"> {{ $user->name }}</a></td>
-                                        <td>{{ $user->loan->amount ?? '--' }}</td>
-                                        <td>{{ $user->loan->duration ?? '--' }}</td>
-                                        <td>{{ $user->loan->loanTransactions->sum('amount') ?? '--' }}</td>
-                                        <td>{{ $user->loan->isActive ? 'Active' : 'Inactive' }}</td>
-                                        <td>{{ $user->loan->start_date }}</td>
+                                        <td>{{ $user->loan?->amount ?? '--' }}</td>
+                                        <td>{{ $user->loan?->duration ?? '--' }}</td>
+                                        <td>{{ $user->loan?->loanTransactions?->sum('amount') ?? '--' }}</td>
+                                        <td>{{ $user->loan?->isActive ? 'Active' : 'Inactive' }}</td>
+                                        <td>{{ $user->loan?->start_date }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

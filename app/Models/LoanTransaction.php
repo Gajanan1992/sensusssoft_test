@@ -19,6 +19,5 @@ class LoanTransaction extends Model
 
     protected $casts = [
         'date' => 'datetime',
-        'isActive' => 'boolean',
     ];
 }

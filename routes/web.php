@@ -21,10 +21,5 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/apply-loan', [LoanController::class, 'applyLoan'])->name('apply-loan');
-Route::post('/approve-loan', [LoanController::class, 'approveLoan'])->name('approve-loan');
 Route::get('/loan-details/{user}', [LoanController::class, 'loanDetails'])->name('loan-Details');
 Route::get('/pay/{loan}', [LoanController::class, 'pay'])->name('loan-Details');
-// Route::get('/apply-loan', function () {
-//     dd('apply-loan');
-// })->name('apply-loan');

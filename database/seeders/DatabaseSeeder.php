@@ -20,12 +20,13 @@ class DatabaseSeeder extends Seeder
         $users =  \App\Models\User::factory(10)->create();
 
         foreach ($users as $user) {
+            $duration = rand(1, 365);
             $loan = \App\Models\Loan::factory()->for($user)->create([
                 'amount' => rand(100, 1000000),
                 'interest_rate' => config('loan.interest_rate'),
-                'duration' => 30,
+                'duration' => $duration,
                 'start_date' => now(),
-                'end_date' => now()->addDays(30),
+                'end_date' => now()->addDays($duration),
                 'isActive' => true,
                 'purpose' => 'Loan for personel use',
             ]);
@@ -46,20 +47,16 @@ class DatabaseSeeder extends Seeder
             //     ]);
             // }
         }
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
     }
 
-    private function getLoanAmount($loan)
-    {
-        $interestRate = $loan->interest_rate / 100;
-        $dailyRate = $interestRate / 365;
-        $dailyInterestAmount = $loan->amount * $dailyRate;
-        $totalInterestAmount = $dailyInterestAmount * $loan->duration;
-        $totalLoanAmount = $loan->amount + $totalInterestAmount;
-        $dailyAmountToPay = $totalLoanAmount / $loan->duration;
-        return $dailyAmountToPay;
-    }
+    // private function getLoanAmount($loan)
+    // {
+    //     $interestRate = $loan->interest_rate / 100;
+    //     $dailyRate = $interestRate / 365;
+    //     $dailyInterestAmount = $loan->amount * $dailyRate;
+    //     $totalInterestAmount = $dailyInterestAmount * $loan->duration;
+    //     $totalLoanAmount = $loan->amount + $totalInterestAmount;
+    //     $dailyAmountToPay = $totalLoanAmount / $loan->duration;
+    //     return $dailyAmountToPay;
+    // }
 }
